@@ -45,9 +45,6 @@ public class ProxyTestTask implements Runnable {
 				System.out.println(Thread.currentThread().getName() + proxy.toString() + "----------代理可用--------请求耗时:"
 						+ (endTime - startTime) + "ms");
 				ProxyPool.lock.writeLock().lock();
-				if ((endTime - startTime)<10000) {
-					System.out.println();
-				}
 				try {
 					ProxyPool.proxySet.add(proxy);
 				} finally {

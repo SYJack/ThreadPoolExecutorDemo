@@ -5,8 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.HttpHost;
 import org.apache.http.HttpStatus;
@@ -21,6 +24,10 @@ public class ZhiHuDownTask implements Runnable {
 
 	protected HttpRequestBase requestBase;
 	protected static ZhiHuHttpClient zhiHuHttpClient = ZhiHuHttpClient.getInstance();
+	/**
+	 * Thread-数据库连接
+	 */
+	private static Map<Thread, Connection> connectionMap = new ConcurrentHashMap<Thread, Connection>();
 	private static MongoDBDaoImpl mongoDBDaoImpl = MongoDBDaoImpl.getInstance("127.0.0.1", 27017);
 
 	public ZhiHuDownTask() {
@@ -46,7 +53,9 @@ public class ZhiHuDownTask implements Runnable {
 					this.requestBase.setConfig(HttpClientUtil.getRequestConfigBuilder().setProxy(host).build());
 					page = zhiHuHttpClient.getWebPage(requestBase);
 					if (page.getStatusCode() == HttpStatus.SC_OK) {
-						parserJson(page.getHtml());
+						if (page.getHtml() != null) {
+							parserJson(page.getHtml());
+						}
 					} else {
 						zhiHuHttpClient.getZhiHuDownLoadThreadPoolExecutor().execute(new ZhiHuDownTask());
 					}
@@ -69,39 +78,44 @@ public class ZhiHuDownTask implements Runnable {
 		Integer userCount = dc.read(baseJsonPath);
 		for (int i = 0; i < userCount; i++) {
 			ZhihuUserInfo userInfo = new ZhihuUserInfo();
+
 			String userBaseJsonPath = "$.data[" + i + "]";
-			setUserInfoByJsonPth(userInfo, "userToken", dc, userBaseJsonPath + ".url_token");
-			setUserInfoByJsonPth(userInfo, "userName", dc, userBaseJsonPath + ".name");// username
-			setUserInfoByJsonPth(userInfo, "gender", dc, userBaseJsonPath + ".gender");// 性别
-			setUserInfoByJsonPth(userInfo, "followingNum", dc, userBaseJsonPath + ".following_count");// 关注人数
-			setUserInfoByJsonPth(userInfo, "location", dc, userBaseJsonPath + ".locations[0].name");// 位置
-			setUserInfoByJsonPth(userInfo, "headline", dc, userBaseJsonPath + ".headline");
-			setUserInfoByJsonPth(userInfo, "business", dc, userBaseJsonPath + ".business.name");// 行业
-			setUserInfoByJsonPth(userInfo, "company", dc, userBaseJsonPath + ".employments[0].company.name");// 公司
-			setUserInfoByJsonPth(userInfo, "position", dc, userBaseJsonPath + ".employments[0].job.name");// 职位
-			setUserInfoByJsonPth(userInfo, "education", dc, userBaseJsonPath + ".educations[0].school.name");// 学校
-			setUserInfoByJsonPth(userInfo, "major", dc, userBaseJsonPath + ".educations[0].major.name");// 专业
-			setUserInfoByJsonPth(userInfo, "answersNum", dc, userBaseJsonPath + ".answer_count");// 回答数
-			setUserInfoByJsonPth(userInfo, "questions", dc, userBaseJsonPath + ".question_count");// 提问数
-			setUserInfoByJsonPth(userInfo, "articlesNum", dc, userBaseJsonPath + ".articles_count");// 文章数
-			setUserInfoByJsonPth(userInfo, "followersNum", dc, userBaseJsonPath + ".follower_count");// 粉丝数
-			setUserInfoByJsonPth(userInfo, "starsNum", dc, userBaseJsonPath + ".voteup_count");// 赞同数
-			setUserInfoByJsonPth(userInfo, "thxNum", dc, userBaseJsonPath + ".thanked_count");// 感谢数
-
 			String userToken = dc.read(userBaseJsonPath + ".url_token");
-			userInfo.setUrl("https://www.zhihu.com/people/" + userToken);
-
-			Integer gender = dc.read(userBaseJsonPath + ".gender");
-			if (gender != null && gender == 0) {
-				String protrait = dc.read(userBaseJsonPath + ".avatar_url_template");
-				String protraitReplace = protrait.replace("{size}", "xl");
-				userInfo.setPortrait(protraitReplace);
-				InputStream in = zhiHuHttpClient.getWebPageInputStream(protraitReplace);
-				savePicToDisk(in, "D:/zhihu/", userToken + ".jpg");
+			if (App.filterUserToken.contains(userToken)) {
+				continue;
 			}
-			userList.add(userInfo);
-			mongoDBDaoImpl.insert("zhihudb", "zhihuuserinfosss", userInfo);
-			if (!App.filterUserToken.contains(userToken) && userToken != null && userToken != "null") {
+			if (userToken != null && userToken != "null") {
+				setUserInfoByJsonPth(userInfo, "userToken", dc, userBaseJsonPath + ".url_token");
+				setUserInfoByJsonPth(userInfo, "userName", dc, userBaseJsonPath + ".name");// username
+				setUserInfoByJsonPth(userInfo, "gender", dc, userBaseJsonPath + ".gender");// 性别
+				setUserInfoByJsonPth(userInfo, "followingNum", dc, userBaseJsonPath + ".following_count");// 关注人数
+				setUserInfoByJsonPth(userInfo, "location", dc, userBaseJsonPath + ".locations[0].name");// 位置
+				setUserInfoByJsonPth(userInfo, "headline", dc, userBaseJsonPath + ".headline");
+				setUserInfoByJsonPth(userInfo, "business", dc, userBaseJsonPath + ".business.name");// 行业
+				setUserInfoByJsonPth(userInfo, "company", dc, userBaseJsonPath + ".employments[0].company.name");// 公司
+				setUserInfoByJsonPth(userInfo, "position", dc, userBaseJsonPath + ".employments[0].job.name");// 职位
+				setUserInfoByJsonPth(userInfo, "education", dc, userBaseJsonPath + ".educations[0].school.name");// 学校
+				setUserInfoByJsonPth(userInfo, "major", dc, userBaseJsonPath + ".educations[0].major.name");// 专业
+				setUserInfoByJsonPth(userInfo, "answersNum", dc, userBaseJsonPath + ".answer_count");// 回答数
+				setUserInfoByJsonPth(userInfo, "questions", dc, userBaseJsonPath + ".question_count");// 提问数
+				setUserInfoByJsonPth(userInfo, "articlesNum", dc, userBaseJsonPath + ".articles_count");// 文章数
+				setUserInfoByJsonPth(userInfo, "followersNum", dc, userBaseJsonPath + ".follower_count");// 粉丝数
+				setUserInfoByJsonPth(userInfo, "starsNum", dc, userBaseJsonPath + ".voteup_count");// 赞同数
+				setUserInfoByJsonPth(userInfo, "thxNum", dc, userBaseJsonPath + ".thanked_count");// 感谢数
+
+				userInfo.setUrl("https://www.zhihu.com/people/" + userToken);
+
+				Integer gender = dc.read(userBaseJsonPath + ".gender");
+				if (gender != null && gender == 0) {
+					String protrait = dc.read(userBaseJsonPath + ".avatar_url_template");
+					String protraitReplace = protrait.replace("{size}", "xl");
+					userInfo.setPortrait(protraitReplace);
+					InputStream in = zhiHuHttpClient.getWebPageInputStream(protraitReplace);
+					savePicToDisk(in, "D:/zhihu/", userToken + ".jpg");
+				}
+				userList.add(userInfo);
+				mongoDBDaoImpl.insert("zhihudb", "zhihuuserinfosss", userInfo);
+
 				try {
 					App.filterUserToken.add(userToken);
 					App.userTokenQueue.put(userToken);

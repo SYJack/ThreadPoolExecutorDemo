@@ -55,7 +55,7 @@ public class MongoDBDaoImpl implements MongoDBDao {
 	public boolean insert(String dbName, String collectionName, ZhihuUserInfo userInfo) {
 		if (userInfo != null) {
 			Map<String, Object> insertMap = new HashMap<String, Object>();
-			insertMap.put("urlToken", userInfo.getUserToken());
+			insertMap.put("userToken", userInfo.getUserToken());
 			insertMap.put("username", userInfo.getUserName());
 			insertMap.put("gender", userInfo.getGender());
 			insertMap.put("business", userInfo.getBusiness());
@@ -63,6 +63,7 @@ public class MongoDBDaoImpl implements MongoDBDao {
 			insertMap.put("position", userInfo.getPosition());
 			insertMap.put("education", userInfo.getEducation());
 			insertMap.put("location", userInfo.getLocation());
+			insertMap.put("headline", userInfo.getHeadline());
 			insertMap.put("major", userInfo.getMajor());
 			insertMap.put("answersNum", userInfo.getAnswersNum());
 			insertMap.put("starsNum", userInfo.getStarsNum());
