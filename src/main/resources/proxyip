@@ -64,3 +64,4 @@
 139.170.192.56:9999
 183.45.172.98:9797
 124.234.157.250:80
+mongoexport -d zhihudb -c zhihuuserinfosss -f urlToken,username,gender,business,company,position,education,major,location,answersNum,questions,articlesNum,starsNum,thxNum,followingNum,followersNum,portrait,url --csv -o zhihu.csv
