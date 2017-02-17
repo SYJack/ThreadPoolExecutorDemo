@@ -14,6 +14,7 @@ public class App {
 	public static void main(String[] args) {
 		ProxyHttpClient.getInstance().startDownLoadProxy();
 		ZhiHuHttpClient.getInstance().startCrawl();
+		ZhiHuImageHttpClient.getInstance().startDownImage();
 	}
 
 	public static void save() {

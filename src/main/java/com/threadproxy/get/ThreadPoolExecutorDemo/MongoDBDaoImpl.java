@@ -14,6 +14,7 @@ import com.mongodb.ServerAddress;
 import com.mongodb.WriteConcern;
 
 public class MongoDBDaoImpl implements MongoDBDao {
+
 	private MongoClient mongoClient = null;
 
 	public MongoDBDaoImpl(String host, int port) {
