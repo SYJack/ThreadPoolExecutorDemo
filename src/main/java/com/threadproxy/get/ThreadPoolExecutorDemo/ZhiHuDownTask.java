@@ -140,8 +140,6 @@ public class ZhiHuDownTask implements Runnable {
 			Field field = userInfo.getClass().getDeclaredField(fieldName);
 			field.setAccessible(true);
 			field.set(userInfo, o);
-		} catch (PathNotFoundException e1) {
-			// no results
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

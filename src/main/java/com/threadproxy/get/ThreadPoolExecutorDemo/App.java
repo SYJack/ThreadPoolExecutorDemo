@@ -5,16 +5,22 @@ import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 public class App {
+	// ip BloomFilter,过滤相同ip
 	public static BloomFilter filterIP = new BloomFilter();
-
+	// 过滤相同usertoken
 	public static BloomFilter filterUserToken = new BloomFilter();
-
+	// usetoken 队列
 	public static BlockingDeque<String> userTokenQueue = new LinkedBlockingDeque<String>();
+	// image urlId deque
+	public static BlockingDeque<String> imageUrlIdQueue = new LinkedBlockingDeque<String>();
 
 	public static void main(String[] args) {
 		ProxyHttpClient.getInstance().startDownLoadProxy();
-		ZhiHuHttpClient.getInstance().startCrawl();
+		// ZhiHuHttpClient.getInstance().startCrawl();
+		long start = System.currentTimeMillis();
 		ZhiHuImageHttpClient.getInstance().startDownImage();
+		long end = System.currentTimeMillis();
+		System.out.println((end - start) / 1000 + "s");
 	}
 
 	public static void save() {

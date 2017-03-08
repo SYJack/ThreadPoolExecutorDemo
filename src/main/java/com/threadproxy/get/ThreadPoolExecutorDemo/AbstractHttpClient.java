@@ -55,6 +55,6 @@ public abstract class AbstractHttpClient {
 		page.setStatusCode(response.getStatusLine().getStatusCode());
 		page.setHtml(EntityUtils.toString(response.getEntity()));
 		page.setUrl(request.getURI().toString());
-		return page;
+		return page; 
 	}
 }
