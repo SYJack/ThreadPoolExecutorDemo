@@ -111,6 +111,11 @@ public class ZhiHuImageDownTask implements Runnable {
 		}
 	}
 
+	/**
+	 * 从队列中获取url id
+	 * 
+	 * @return
+	 */
 	public String getUrlIdFormQueue() {
 		try {
 			return App.imageUrlIdQueue.take();
@@ -120,6 +125,11 @@ public class ZhiHuImageDownTask implements Runnable {
 		return null;
 	}
 
+	/**
+	 * 
+	 * @param content
+	 * @return
+	 */
 	private HashSet<String> getImageUrl(String content) {
 		HashSet<String> urls = new HashSet<String>();
 		Pattern pattern = Pattern.compile("data-original.+?\"(.*?)\"");
@@ -130,6 +140,11 @@ public class ZhiHuImageDownTask implements Runnable {
 		return urls;
 	}
 
+	/**
+	 * 
+	 * @param s
+	 * @return
+	 */
 	private String getIdentification(String s) {
 		Pattern p = Pattern.compile("-(.*?)_r");
 		Matcher matcher = p.matcher(s);
@@ -142,7 +157,6 @@ public class ZhiHuImageDownTask implements Runnable {
 	// 传入zhiHuPicBean，创建文件夹，并下载图片
 	public void downLoadPics(ZhiHuImageBean imageBean, String filePath) {
 		try {
-			boolean isSuccess = true;
 			// 文件路径+标题
 			String dir = filePath + imageBean.getTitle();
 			// 创建
@@ -153,6 +167,9 @@ public class ZhiHuImageDownTask implements Runnable {
 			// 循环下载图片
 			for (String zhiHuPic : zhiHuPics) {
 				String s = getIdentification(zhiHuPic);
+				if (s == null || s.equals("null")) {
+					s = RandomCharData.createRandomCharData(20);
+				}
 				URL url = new URL(zhiHuPic);
 				// 打开网络输入流
 				DataInputStream dis = new DataInputStream(url.openStream());
