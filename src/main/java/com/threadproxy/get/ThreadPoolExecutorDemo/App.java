@@ -16,9 +16,9 @@ public class App {
 
 	public static void main(String[] args) {
 		ProxyHttpClient.getInstance().startDownLoadProxy();
-		// ZhiHuHttpClient.getInstance().startCrawl();
+		ZhiHuHttpClient.getInstance().startCrawl();
 		long start = System.currentTimeMillis();
-		ZhiHuImageHttpClient.getInstance().startDownImage();
+		/*ZhiHuImageHttpClient.getInstance().startDownImage();*/
 		long end = System.currentTimeMillis();
 		System.out.println((end - start) / 1000 + "s");
 	}

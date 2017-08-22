@@ -58,30 +58,32 @@ public class ZhiHuImageHttpClient extends AbstractHttpClient {
 	// https://www.zhihu.com/collection/38123480
 	private List<String> getCollectionUrlLists() {
 		List<String> imageUrls = new ArrayList<String>();
+		String[] collectionId = { "62864589", "102112319" };
 		int i = 1;
-
-		String url = "https://www.zhihu.com/collection/38123480?page=";
 		try {
-			String pageCountContent = HttpClientUtil.getWebPage(url + i);
-			Document doc = Jsoup.parse(pageCountContent);
-			int pageCounts = 0;
-			// 获取页数
-			Elements pages = doc.select("[class=zm-invite-pager]");
-			for (Element page : pages) {
-				Elements a = page.getElementsByTag("a");
-				pageCounts = Integer.parseInt(a.get(2).text());
-			}
-			for (int j = 1; j < pageCounts; j++) {
-				String urlListContent = HttpClientUtil.getWebPage(url + j);
-				Document urlDoc = Jsoup.parse(urlListContent);
-				Elements urls = urlDoc.select("[class=zm-item-rich-text expandable js-collapse-body]");
-				for (Element element : urls) {
-					imageUrls.add(getRealUrlId(element.attr("data-entry-url")));
+			for (String id : collectionId) {
+				String url = "https://www.zhihu.com/collection/" + id + "?page=";
+
+				String pageCountContent = HttpClientUtil.getWebPage(url + i);
+				Document doc = Jsoup.parse(pageCountContent);
+				int pageCounts = 0;
+				// 获取页数
+				Elements pages = doc.select("[class=zm-invite-pager]");
+				for (Element page : pages) {
+					Elements a = page.getElementsByTag("a");
+					pageCounts = Integer.parseInt(a.get(2).text());
 				}
+				for (int j = 1; j < pageCounts; j++) {
+					String urlListContent = HttpClientUtil.getWebPage(url + j);
+					Document urlDoc = Jsoup.parse(urlListContent);
+					Elements urls = urlDoc.select("[class=zm-item-rich-text expandable js-collapse-body]");
+					for (Element element : urls) {
+						imageUrls.add(getRealUrlId(element.attr("data-entry-url")));
+					}
 
+				}
+				return imageUrls;
 			}
-			return imageUrls;
-
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -18,7 +18,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
 
 public class ZhiHuDownTask implements Runnable {
 
